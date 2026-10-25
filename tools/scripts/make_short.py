@@ -218,7 +218,11 @@ def render(spec, out_path):
     if spec.get("voice", True):
         sys.path.insert(0, HERE)
         from voice import speak
-        texts = [spec["hook"]] + list(spec["facts"]) + [spec["cta"]]
+        say = spec.get("say") or {}  # optional spoken versions (Urdu days: Devanagari)
+        texts = ([say.get("hook") or spec["hook"]]
+                 + [(say.get("facts") or [None] * len(spec["facts"]))[i] or f
+                    for i, f in enumerate(spec["facts"])]
+                 + [say.get("cta") or spec["cta"]])
         clips = [speak(t, lang) for t in texts]
     timeline, total = build_timeline(spec, clips)
 

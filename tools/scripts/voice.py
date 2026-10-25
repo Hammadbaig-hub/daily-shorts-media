@@ -52,7 +52,13 @@ def speak(text, lang):
     """Return float32 mono audio at 24 kHz for one line of text."""
     k = engine()
     voice, espeak_lang, speed = VOICES[lang]
-    if lang == "ur":
+    if lang == "ur" and any("\u0900" <= c <= "\u097f" for c in text):
+        # Best quality: Urdu written phonetically in Devanagari ("say" lines in
+        # script.json). This is exactly what the Hindi voice was trained on, so
+        # vowels, nasals and pauses come out right.
+        ph = k.tokenizer.phonemize(text, lang="hi")
+        audio, _ = k.create(ph, voice=voice, speed=speed, is_phonemes=True)
+    elif lang == "ur":
         ph = k.tokenizer.phonemize(text, lang="ur")
         for a, b in UR_FIX:
             ph = ph.replace(a, b)

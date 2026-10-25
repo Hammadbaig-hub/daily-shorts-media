@@ -79,6 +79,22 @@ Urdu days: write natural, simple Urdu in Urdu script (not Roman Urdu), the way a
 Pakistani viewer speaks — not a word-for-word translation. Write numbers as
 Urdu words (بیس فیصد, ہزاروں) so the voice pronounces them correctly.
 
+**Urdu pronunciation (important):** Urdu script has no short-vowel marks, so the
+voice guesses them and often gets words wrong (زہرہ → "zehra-a", گرد → "gard").
+On Urdu days always add a `say` block with the same lines written phonetically
+in Devanagari — the Hindi voice was trained on exactly that, so vowels, nasals,
+ق/خ/غ/ف/ز sounds and comma pauses come out right. Keep the wording identical to
+the Urdu lines (Urdu words, not Hindi substitutes — मेहवर, हक़ाइक़, गिर्द, सिर्फ़),
+use nuqta letters (क़ ख़ ग़ ज़ फ़), write numbers as words (दो सौ पच्चीस), and keep
+the punctuation. The screen still shows the Urdu-script text; only the voice
+reads `say`.
+
+```json
+"say": {"hook": "ज़ोहरा पर एक दिन, एक साल से भी लंबा होता है!",
+        "facts": ["...", "..."],
+        "cta": "रोज़ाना नए हक़ाइक़ के लिए ब्राइट लाइफ़ को फ़ॉलो करें।"}
+```
+
 CTA examples — EN: "Follow Bright Life for a new fact every day". UR: "روزانہ نئے حقائق کے لیے برائٹ لائف کو فالو کریں".
 
 Save as `script.json`:

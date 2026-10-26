@@ -1,12 +1,12 @@
 ---
 name: youtube-daily-shorts
-description: Makes and auto-publishes one free animated-text "facts / motivation" YouTube Short per day — picks a fresh topic, verifies every fact on the web, renders a 1080x1920 video with code (no AI credits), hosts it on GitHub and schedules it on YouTube through Metricool, alternating English and Urdu days. Use this whenever the user asks to make, post, upload or schedule today's YouTube Short, run the daily Shorts routine, manage the facts channel, or check how the Shorts are performing — even if they just say "aaj ki video bana do" or "YouTube wala kaam kar do".
+description: Makes and auto-publishes one free animated-text "facts / motivation" YouTube Short per day — picks a fresh topic, verifies every fact on the web, renders a 1080x1920 video with code (no AI credits), hosts it on GitHub and schedules it on YouTube through Metricool, in Urdu (Urdu-only since 2026-10-26). Use this whenever the user asks to make, post, upload or schedule today's YouTube Short, run the daily Shorts routine, manage the facts channel, or check how the Shorts are performing — even if they just say "aaj ki video bana do" or "YouTube wala kaam kar do".
 ---
 
 # YouTube Daily Shorts
 
 One Short per day, fully automatic, zero cost. The channel posts "Did you know?"
-style facts and short motivational pieces, one day in English and the next in Urdu.
+style facts and short motivational pieces, in Urdu only — the user switched the channel to Urdu-only "amazing facts" on 2026-10-26 because Urdu Shorts were doing better. Don't make English videos unless the user asks again.
 
 ## Fixed settings (change here if the user changes them)
 
@@ -17,6 +17,7 @@ style facts and short motivational pieces, one day in English and the next in Ur
 | Channel | "Bright Life", handle `@Bright-Life-m4` (put the handle in script.json; CTA mentions "Bright Life") |
 | Publish time | 19:00 Pakistan time (or the next free slot if that has passed; at least 15 min from now) |
 | Privacy | public (user chose full auto-upload) |
+| Language | Urdu only, "amazing facts" style (`LANG_MODE` in plan_today.py) |
 
 ## Why it is built this way
 
@@ -195,7 +196,7 @@ watching, send that summary with SendUserMessage.
 Use `getAnalyticsDataByMetrics` for the YouTube network over the last 7 days
 (views, watch time, subscribers gained, top videos). Summarize what worked —
 which categories and which language got more views — and use that to lean
-next week's topic choices toward what performs. Keep the alternating language
+next week's topic choices toward what performs. Keep making Urdu-only videos
 unless the user says otherwise.
 
 ## When something fails

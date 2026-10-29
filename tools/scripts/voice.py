@@ -66,3 +66,42 @@ def speak(text, lang):
     else:
         audio, _ = k.create(text, voice=voice, speed=speed, lang=espeak_lang)
     return np.asarray(audio, dtype=np.float32)
+
+
+# ---------------------------------------------------------------------------
+# Native Urdu voice: Piper "Fasih" (ur_PK, male, MIT), trained on real Urdu
+# speech, so the accent is genuinely Urdu. Hosted on sherpa-onnx GitHub releases.
+PIPER_UR_URL = ("https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/"
+                "vits-piper-ur_PK-fasih-medium.tar.bz2")
+_piper = None
+
+
+def _piper_voice():
+    global _piper
+    if _piper is None:
+        try:
+            from piper import PiperVoice  # noqa
+        except ImportError:
+            subprocess.run(["pip", "install", "-q", "--break-system-packages", "piper-tts"], check=True)
+        from piper import PiperVoice
+        d = os.path.join(KOKORO_DIR, "vits-piper-ur_PK-fasih-medium")
+        onnx = os.path.join(d, "ur_PK-fasih-medium.onnx")
+        if not os.path.exists(onnx):
+            os.makedirs(KOKORO_DIR, exist_ok=True)
+            tarp = os.path.join(KOKORO_DIR, "fasih.tar.bz2")
+            subprocess.run(["curl", "-sSfL", "-o", tarp, PIPER_UR_URL], check=True)
+            subprocess.run(["tar", "xjf", tarp, "-C", KOKORO_DIR], check=True)
+        _piper = PiperVoice.load(onnx, config_path=onnx + ".json")
+    return _piper
+
+
+def speak_urdu_native(text, speed=1.0):
+    """Float32 mono at 24 kHz (resampled from Piper's 22.05 kHz)."""
+    from piper import SynthesisConfig
+    v = _piper_voice()
+    cfg = SynthesisConfig(length_scale=1.0 / speed)
+    chunks = [c.audio_float_array for c in v.synthesize(text, syn_config=cfg)]
+    a = np.concatenate(chunks).astype(np.float32)
+    sr_in = v.config.sample_rate
+    x = np.arange(0, len(a), sr_in / SR)
+    return np.interp(x, np.arange(len(a)), a).astype(np.float32)

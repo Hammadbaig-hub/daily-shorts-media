@@ -1,12 +1,15 @@
 ---
 name: youtube-daily-shorts
-description: Makes and auto-publishes one free animated-text "facts / motivation" YouTube Short per day — picks a fresh topic, verifies every fact on the web, renders a 1080x1920 video with code (no AI credits), hosts it on GitHub and schedules it on YouTube through Metricool, in Urdu (Urdu-only since 2026-10-26). Use this whenever the user asks to make, post, upload or schedule today's YouTube Short, run the daily Shorts routine, manage the facts channel, or check how the Shorts are performing — even if they just say "aaj ki video bana do" or "YouTube wala kaam kar do".
+description: Makes and auto-publishes one free Urdu health & nutrition awareness YouTube Short per day for Bright Life — picks a fresh topic, verifies every claim against WHO/NHS-level sources, renders an animated 1080x1920 video with native Urdu narration and moving 3D icons (no AI credits), hosts it on GitHub and schedules it on YouTube through Metricool. Use whenever the user asks to make, post, upload or schedule today's Short, run the daily Shorts routine, manage the channel, or check how the Shorts are doing — even if they just say "aaj ki video bana do" or "YouTube wala kaam kar do".
 ---
 
-# YouTube Daily Shorts
+# YouTube Daily Shorts — Health & Nutrition Awareness (Urdu)
 
-One Short per day, fully automatic, zero cost. The channel posts "Did you know?"
-style facts and short motivational pieces, in Urdu only — the user switched the channel to Urdu-only "amazing facts" on 2026-10-26 because Urdu Shorts were doing better. Don't make English videos unless the user asks again.
+One Short per day, fully automatic, zero cost. Since 2026-10-30 the channel posts
+**health and nutrition awareness** videos in professional Urdu: everyday habits,
+food, water, sleep, movement, hygiene — explained simply, with animated 3D icons
+that never stop moving and captions that light up word by word as the voice
+speaks. (Before that it posted general "amazing facts"; those are in history.json.)
 
 ## Fixed settings (change here if the user changes them)
 
@@ -14,28 +17,30 @@ style facts and short motivational pieces, in Urdu only — the user switched th
 |---|---|
 | GitHub media repo | `Hammadbaig-hub/daily-shorts-media` (public, branch `main`) — also holds the render tools in `tools/` |
 | Metricool brand (blogId) | `7592220`, timezone `Asia/Karachi` |
-| Channel | "Bright Life", handle `@Bright-Life-m4` (put the handle in script.json; CTA mentions "Bright Life") |
+| Channel | "Bright Life", handle `@Bright-Life-m4` |
 | Publish time | 19:00 Pakistan time (or the next free slot if that has passed; at least 15 min from now) |
 | Privacy | public (user chose full auto-upload) |
-| Language | Urdu only, "amazing facts" style (`LANG_MODE` in plan_today.py) |
+| Language | Urdu only |
+| Renderer | `tools/scripts/make_health_short.py` |
 
 ## Why it is built this way
 
-- **Free:** the user has no budget, so the video is drawn with Pillow + ffmpeg
-  (`tools/scripts/make_short.py` in the repo) and the music is synthesized in the same script, which
-  also means no Content ID copyright claims.
-- **Voiceover:** narration comes from Kokoro, a small free neural TTS model that
-  runs offline on CPU (`tools/scripts/voice.py`). Its ~350 MB model files download once
-  from GitHub releases into `~/tts`. English uses `am_michael`; Urdu is spoken by
-  the Hindi voice `hm_omega` from Urdu-script text, with a few phonemes remapped.
-  Each slide lasts as long as its narration, and the music is ducked underneath.
-  Cloud TTS (Microsoft/Google) is blocked from the workspace, which is why it is offline.
-- **GitHub hosting:** Metricool needs a public video URL. The cloud workspace can
-  push to GitHub, and the raw file URL is public, so that is the bridge.
-- **Fact-checking:** a facts channel lives or dies on accuracy. YouTube also
-  suppresses mass-produced, low-value or misleading content, and a wrong "fact"
-  invites dislikes and correction comments. Every fact gets verified before it is
-  used — this is the part of the job that adds real value.
+- **Free:** the user has no budget. Video = Pillow + numpy + ffmpeg; music is
+  synthesized in the script (original, so no Content ID claims).
+- **Native Urdu voice:** Piper "Fasih" (ur_PK, male, MIT licence), trained on real
+  Urdu speech, so the accent is genuinely Pakistani Urdu. Downloads once (~67 MB)
+  from the sherpa-onnx GitHub release into `~/tts`. The renderer speeds it up 6%,
+  EQs it for clarity, compresses it and normalises the mix to −14 LUFS (YouTube's
+  playback level) so it sounds clear and lively on phones. The user approved this
+  voice on 2026-10-29.
+- **Animation:** Microsoft Fluent 3D emoji (MIT) in `tools/assets/icons/` — they
+  pop in, bob, sway and breathe the whole time; faint icons drift in the
+  background; captions appear word by word with the spoken word highlighted.
+  Constant motion keeps viewers from swiping away.
+- **Accuracy and YouTube's medical policy:** YouTube removes health content that
+  contradicts WHO or local health authorities, and can strike the channel. Every
+  claim must come from an authoritative source, and the channel only does
+  *awareness* — never diagnosis, treatment, dosing or cures.
 
 ## Daily workflow
 
@@ -43,113 +48,128 @@ style facts and short motivational pieces, in Urdu only — the user switched th
 
 ```bash
 cd ~ && (git -C daily-shorts-media pull -q || git clone https://github.com/Hammadbaig-hub/daily-shorts-media.git)
-pip install -q --break-system-packages kokoro-onnx soundfile pillow numpy
+pip install -q --break-system-packages piper-tts pillow numpy soundfile
 python daily-shorts-media/tools/scripts/plan_today.py daily-shorts-media/history.json
 ```
 
 If the repo is not in the session, attach it first with `add_repo`
 (owner `Hammadbaig-hub`, repo `daily-shorts-media`, access `push`) and clone it.
 
-`plan_today.py` returns today's `lang`, `theme`, whether a video was already
-posted today, and every topic used so far. If `posted_today` is true, stop and
-report that — never post twice in one day.
+`plan_today.py` returns `theme`, whether a video was already posted today, and
+every topic used so far. If `posted_today` is true, stop and report that — never
+post twice in one day. Use `theme % 4` as the video's `palette`.
 
 ### 2. Pick a topic
 
-Rotate across categories so the channel stays varied: space, animals, human body,
-history, geography, science, technology, food, ocean, inventions, language,
-and roughly one day in five a motivation piece (a lesson or habit backed by a real
-study, or a well-documented true story). Pick something not in `already_done` and
-not a near-duplicate of it.
+Rotate across these so the channel stays varied and useful for Pakistani families:
 
-Stay away from: medical or diet advice, politics, sectarian or religious debate,
-anything about real private people, and "facts" that are commonly repeated myths
-(e.g. goldfish 3-second memory, the Great Wall being visible from space).
+- **Nutrition:** sugar, salt, oil/ghee and trans fats, fruit vs juice, vegetables,
+  daal and protein, whole grains, breakfast, fast food, packaged snacks, cold drinks
+- **Water & hydration:** how much, signs of dehydration, heat-wave safety
+- **Daily habits:** sleep, walking/physical activity, screen time, sitting too long
+- **Hygiene:** handwashing, food safety at home, clean drinking water
+- **Body awareness:** blood pressure basics, why checkups matter, dental care,
+  eye care, sun and heat
+- **Family:** healthy lunchbox ideas for children, breastfeeding facts (WHO),
+  elderly nutrition — always general, never personal medical guidance
 
-### 3. Write the script and verify it
+Pick something not in `already_done` and not a near-duplicate of it.
 
-Write a hook (under 12 words, curiosity-driven), 3–5 facts (each one sentence,
-under 25 words), and a CTA.
+**Stay away from:** treatment or medicine advice (doses, which pill to take),
+cures or "nuskhe", supplements and weight-loss products, claims that a food
+treats or prevents a specific disease beyond what WHO/NHS says, vaccines and
+reproductive health debates, mental-health crisis content, anything about a real
+person, politics, and religious rulings.
 
-For every fact, run a WebSearch and confirm it from a reliable source (NASA,
-National Geographic, Britannica, a university, a peer-reviewed study, a major
-encyclopedia). If a fact can't be confirmed, or sources disagree, drop it and use
-another. Keep the source URLs — they go in the description.
+### 3. Write the script and verify every claim
 
-Urdu days: write natural, simple Urdu in Urdu script (not Roman Urdu), the way a
-Pakistani viewer speaks — not a word-for-word translation. Write numbers as
-Urdu words (بیس فیصد, ہزاروں) so the voice pronounces them correctly.
+Use only these kinds of sources: WHO, NHS (UK), CDC, US NIH/MedlinePlus, Pakistan
+Ministry of National Health Services / NIH Pakistan, UNICEF, FAO, or a major
+university or hospital health page (e.g. Mayo Clinic, Harvard T.H. Chan). Run
+WebSearch/WebFetch, read the actual page, and keep its URL. If a claim can't be
+confirmed there, or sources disagree, drop it. Keep numbers exactly as the
+source states them, and keep hedges ("تقریباً", "تک").
 
-**Urdu pronunciation (important):** Urdu script has no short-vowel marks, so the
-voice guesses them and often gets words wrong (زہرہ → "zehra-a", گرد → "gard").
-On Urdu days always add a `say` block with the same lines written phonetically
-in Devanagari — the Hindi voice was trained on exactly that, so vowels, nasals,
-ق/خ/غ/ف/ز sounds and comma pauses come out right. Keep the wording identical to
-the Urdu lines (Urdu words, not Hindi substitutes — मेहवर, हक़ाइक़, गिर्द, सिर्फ़),
-use nuqta letters (क़ ख़ ग़ ज़ फ़), write numbers as words (दो सौ पच्चीस), and keep
-the punctuation. The screen still shows the Urdu-script text; only the voice
-reads `say`.
+Structure (40–70 seconds total):
+- **hook** — a question or surprising line that stops the scroll (under 14 words)
+- **points** — 3–5 short points, one idea each, one or two sentences
+- **cta** — one practical action for today + "صحت مند زندگی کے لیے برائٹ لائف کو فالو کریں"
+- **disclaimer** — always: "یہ معلومات صرف آگاہی کے لیے ہیں۔ کسی بیماری میں ڈاکٹر سے مشورہ کریں۔"
 
-```json
-"say": {"hook": "ज़ोहरा पर एक दिन, एक साल से भी लंबा होता है!",
-        "facts": ["...", "..."],
-        "cta": "रोज़ाना नए हक़ाइक़ के लिए ब्राइट लाइफ़ को फ़ॉलो करें।"}
-```
+Write natural, simple, professional Urdu in Urdu script — the way a Pakistani
+health presenter talks, not a translation. Write numbers as Urdu words (چھ چمچ,
+دس گلاس) so the voice reads them properly, avoid English abbreviations, and keep
+sentences short. If a word keeps coming out wrong, add aerab (zabar/zer/pesh) to
+that word only.
 
-CTA examples — EN: "Follow Bright Life for a new fact every day". UR: "روزانہ نئے حقائق کے لیے برائٹ لائف کو فالو کریں".
+For each scene pick 1–3 icons that show the idea, add `mark` (`good` ✅, `bad` ❌,
+`warn` ⚠️) when the point is a do or a don't, and use `count` when a number of
+things is the point (e.g. 10 spoons of sugar). Icon names are the file names in
+`tools/assets/icons/`:
+
+water glass milk apple orange banana grapes lemon watermelon avocado carrot
+broccoli leafy cucumber salad soup egg fish bread peanuts burger fries soda candy
+chocolate donut cake salt teaspoon heart greenheart anatomicalheart lungs brain
+tooth bicep runner walking yoga sleep bed zzz check cross warning noentry bulb
+sparkles fire sun stopwatch target chartup chartdown stethoscope pill microbe
+shield baby child oldman doctor strong happy sick dizzy thinking shocked yum
+scale sweat
 
 Save as `script.json`:
 
 ```json
-{"lang": "en", "hook": "...", "facts": ["...", "..."], "cta": "...",
- "handle": "@Bright-Life-m4", "theme": 2}
+{
+ "lang": "ur", "palette": 1, "handle": "@Bright-Life-m4",
+ "hook": {"text": "...", "icons": ["candy", "shocked"]},
+ "points": [
+  {"text": "...", "icons": ["soda", "shocked"], "mark": "bad", "count": {"icon": "teaspoon", "n": 10}},
+  {"text": "...", "icons": ["apple", "orange", "milk"], "mark": "good"}
+ ],
+ "cta": {"text": "...", "icons": ["water", "greenheart"]},
+ "disclaimer": "یہ معلومات صرف آگاہی کے لیے ہیں۔ کسی بیماری میں ڈاکٹر سے مشورہ کریں۔"
+}
 ```
 
-### 4. Render
+### 4. Check frames, then render
+
+First draw one frame per scene (takes ~30 s) and look at the contact sheet:
 
 ```bash
-python daily-shorts-media/tools/scripts/make_short.py script.json daily-shorts-media/videos/<date>-<slug>.mp4 > render.log 2>&1
+PREVIEW=1 python daily-shorts-media/tools/scripts/make_health_short.py script.json out.mp4
 ```
 
-Rendering takes about 5 minutes on CPU, so run it with Bash `run_in_background`
-and wait for the completion notice. Don't wait with a `pgrep -f make_short` loop —
-it matches its own command line and never ends. Length follows the narration — usually 25–45 s for 3–5 facts. Keep it under
-55 s so it stays a Short: if the facts are long, use 3 instead of 5.
-
-Because the text is spoken, write it to be *heard*: spell out awkward symbols
-("percent", not "%" in English; "فیصد" in Urdu), avoid brackets and
-abbreviations, and keep sentences short so the voice doesn't rush. Then grab one frame and look at it with Read to
-catch text overflow or broken Urdu:
+It writes `out.mp4.scene0.png`, `scene1.png`, … Look at them with Read: text
+inside the white card, highlight on the right word, icons not overlapping the
+card. If a caption is too long, shorten that line. Delete the PNGs, then render:
 
 ```bash
-ffmpeg -loglevel error -y -ss 5.5 -i <video> -frames:v 1 check.png
+python daily-shorts-media/tools/scripts/make_health_short.py script.json daily-shorts-media/videos/<date>-<slug>.mp4 > render.log 2>&1
 ```
 
-If text runs off the edge or looks wrong, shorten that line and re-render.
+Rendering takes about 6–8 minutes on CPU, so run it with Bash `run_in_background`
+and wait for the completion notice. Don't wait with a `pgrep -f make_` loop — it
+matches its own command line and never ends. The script refuses anything over 3
+minutes; aim for 40–70 s.
 
 ### 5. Push to GitHub
 
 Append today's entry to `history.json`:
-`{"date": "...", "lang": "...", "theme": n, "topic": "...", "title": "...", "file": "videos/...mp4"}`
+`{"date": "...", "lang": "ur", "theme": n, "niche": "health", "topic": "...", "title": "...", "file": "videos/...mp4"}`
 
-Keep only the 20 newest `.mp4` files in `videos/` (delete older ones — they are
-already on YouTube) so the repo stays small. Then:
+Keep only the 20 newest `.mp4` files in `videos/` (Metricool keeps its own copy).
+Then:
 
 ```bash
 cd daily-shorts-media && git add -A && git commit -qm "Short <date>: <topic>" && git push -q
 ```
 
 Public URL: `https://raw.githubusercontent.com/Hammadbaig-hub/daily-shorts-media/main/videos/<file>.mp4`
-
-Check it returns 200 before scheduling (`curl -sI <url> | head -1`); if the
-workspace can't reach that host, trust the successful push and continue.
+— check it returns 200 (`curl -sI <url> | head -1`) before scheduling.
 
 ### 6. Schedule on YouTube through Metricool
 
 Call `createScheduledPost` with `blogId` `7592220`, a top-level `date`
-(`YYYY-MM-DDT19:00:00+05:00` — the call fails without it), and this `info` JSON
-(Metricool copies the video into its own storage, so the GitHub file can be
-pruned later):
+(`YYYY-MM-DDT19:00:00+05:00` — the call fails without it), and this `info` JSON:
 
 ```json
 {
@@ -165,7 +185,7 @@ pruned later):
     "title": "<title>",
     "type": "short",
     "privacy": "public",
-    "tags": ["facts", "did you know", "..."],
+    "tags": ["صحت", "health tips urdu", "nutrition", "..."],
     "category": "EDUCATION",
     "madeForKids": false,
     "isAiGeneratedContent": false
@@ -173,42 +193,40 @@ pruned later):
 }
 ```
 
-`isAiGeneratedContent` is false because the video is plain animated text, not
-realistic synthetic footage; YouTube's disclosure is meant for realistic altered
-media. If a later version adds AI-generated realistic visuals or voices, set it
-to true.
+`isAiGeneratedContent` stays false: the video is animated icons and text, not
+realistic synthetic footage of people or events, which is what YouTube's
+disclosure covers.
 
-**Title:** under 70 characters, curiosity hook + `#shorts`. Write it in the
-day's language. Example: `Your Brain Can't Feel Pain?! 🧠 #shorts`
+**Title (Urdu):** under 70 characters, a curiosity or benefit hook + emoji +
+`#shorts`, e.g. `ایک کین سوڈا میں دس چمچ چینی؟! 🥤 #shorts`.
 
-**Description:** 2–3 lines expanding the hook, then `Sources:` with the URLs
-you verified, then 3–5 hashtags (`#facts #didyouknow #shorts` plus topic tags;
-Urdu days add `#urdu #urdufacts`).
+**Description:** 2–3 Urdu lines on the takeaway, the disclaimer line, then
+`Sources:` with every URL used, then hashtags: `#صحت #HealthTipsUrdu #Nutrition
+#shorts` plus 1–2 topic tags.
 
 ### 7. Report
 
-Tell the user in Roman Urdu, in a few lines: topic, language, title, scheduled
-time, and the Metricool `plannerUrl`. If running as a scheduled task with nobody
-watching, send that summary with SendUserMessage.
+Tell the user in Roman Urdu, in a few lines: topic, title, scheduled time, and the
+Metricool `plannerUrl`. If running as a scheduled task with nobody watching,
+send that summary with SendUserMessage.
 
 ## Weekly check (Sundays, or when asked "channel kaisa chal raha hai")
 
-Use `getAnalyticsDataByMetrics` for the YouTube network over the last 7 days
-(views, watch time, subscribers gained, top videos). Summarize what worked —
-which categories and which language got more views — and use that to lean
-next week's topic choices toward what performs. Keep making Urdu-only videos
-unless the user says otherwise.
+Use `getAnalyticsDataByMetrics` for YouTube over the last 7 days (views, watch
+time, subscribers gained, top videos). Say which topics did best and lean next
+week's choices toward those categories.
 
 ## When something fails
 
 - **Metricool rejects the post:** report the exact error; don't retry the same
-  input. Common causes: missing top-level `date`, video URL not reachable yet (wait a minute, retry once),
-  or the YouTube connection in Metricool expired (user must reconnect it in Metricool).
-- **Git push fails:** the repo isn't attached with push access — call `add_repo`
-  with `access: push`. If it still says Claude has no GitHub access, the Claude
-  GitHub App must have `daily-shorts-media` in its selected repositories
-  (github.com/settings/installations → Claude → Configure); the user confirms
-  that step themselves because GitHub asks for 2FA.
-- **Fonts missing:** they live in `tools/assets/fonts/` in the repo; the script reads them from there.
-- **Voice model download fails:** render with `"voice": false` in script.json so
-  the day's video still goes out (music only), and mention it in the report.
+  input. Common causes: missing top-level `date`, video URL not reachable yet
+  (wait a minute, retry once), or the YouTube connection in Metricool expired
+  (user must reconnect it in Metricool).
+- **Git push fails:** call `add_repo` with `access: push`. If it still says Claude
+  has no GitHub access, the Claude GitHub App must include `daily-shorts-media`
+  (github.com/settings/installations → Claude → Configure); the user confirms that
+  step because GitHub asks for 2FA.
+- **Urdu voice download fails:** fall back to the older renderer
+  `tools/scripts/make_short.py` (Kokoro voice) so the day still gets a video,
+  and say so in the report.
+- **Icons/fonts missing:** they live in `tools/assets/`; the scripts read them from there.

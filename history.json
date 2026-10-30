@@ -1,50 +1,59 @@
 [
-  {
-    "date": "2026-10-24",
-    "lang": "en",
-    "theme": 0,
-    "topic": "Octopus facts (three hearts, blue blood, arm neurons, ink)",
-    "title": "3 Hearts & Blue Blood?! Octopus Facts 🐙 #shorts",
-    "file": "videos/2026-10-24-octopus-facts.mp4"
-  },
-  {
-    "date": "2026-10-25",
-    "lang": "ur",
-    "theme": 1,
-    "topic": "Venus facts (day longer than year, sun rises in west, hottest planet, 90x pressure)",
-    "title": "زہرہ پر دن، سال سے لمبا؟! 🪐 #shorts",
-    "file": "videos/2026-10-25-venus-facts.mp4"
-  },
-  {
-    "date": "2026-10-26",
-    "lang": "en",
-    "theme": 2,
-    "topic": "Honey facts (never spoils/Egyptian tombs, low water + acidic, 2 million flowers per pound, 1/12 teaspoon per bee, 200 wingbeats/sec)",
-    "title": "This Food Lasts THOUSANDS of Years?! 🍯 #shorts",
-    "file": "videos/2026-10-26-honey-facts.mp4"
-  },
-  {
-    "date": "2026-10-27",
-    "lang": "ur",
-    "theme": 3,
-    "topic": "Human body facts (babies ~300 bones vs 206, stapes smallest bone 2-3mm, heart 100,000 beats/day, stomach lining renews every few days)",
-    "title": "پیدائش کے وقت آپ کی ہڈیاں زیادہ تھیں! 🦴 #shorts",
-    "file": "videos/2026-10-27-human-body-ur.mp4"
-  },
-  {
-    "date": "2026-10-28",
-    "lang": "ur",
-    "theme": 4,
-    "topic": "Ocean facts (Challenger Deep ~10,935 m deeper than Everest, ocean makes half of Earth's oxygen via plankton, Pacific bigger than all land, 97% of Earth's water in ocean)",
-    "title": "سمندر میں ایورسٹ بھی ڈوب جائے! 🌊 #shorts",
-    "file": "videos/2026-10-28-ocean-ur.mp4"
-  },
-  {
-    "date": "2026-10-29",
-    "lang": "ur",
-    "theme": 5,
-    "topic": "Moon facts (moves ~3.8 cm/yr away, same side faces Earth/tidal locking, only 12 people walked on it 1969-1972, footprints remain - no wind)",
-    "title": "چاند ہم سے دور جا رہا ہے؟! 🌙 #shorts",
-    "file": "videos/2026-10-29-moon-facts-ur.mp4"
-  }
+ {
+  "date": "2026-10-24",
+  "lang": "en",
+  "theme": 0,
+  "topic": "Octopus facts (three hearts, blue blood, arm neurons, ink)",
+  "title": "3 Hearts & Blue Blood?! Octopus Facts 🐙 #shorts",
+  "file": "videos/2026-10-24-octopus-facts.mp4"
+ },
+ {
+  "date": "2026-10-25",
+  "lang": "ur",
+  "theme": 1,
+  "topic": "Venus facts (day longer than year, sun rises in west, hottest planet, 90x pressure)",
+  "title": "زہرہ پر دن، سال سے لمبا؟! 🪐 #shorts",
+  "file": "videos/2026-10-25-venus-facts.mp4"
+ },
+ {
+  "date": "2026-10-26",
+  "lang": "en",
+  "theme": 2,
+  "topic": "Honey facts (never spoils/Egyptian tombs, low water + acidic, 2 million flowers per pound, 1/12 teaspoon per bee, 200 wingbeats/sec)",
+  "title": "This Food Lasts THOUSANDS of Years?! 🍯 #shorts",
+  "file": "videos/2026-10-26-honey-facts.mp4"
+ },
+ {
+  "date": "2026-10-27",
+  "lang": "ur",
+  "theme": 3,
+  "topic": "Human body facts (babies ~300 bones vs 206, stapes smallest bone 2-3mm, heart 100,000 beats/day, stomach lining renews every few days)",
+  "title": "پیدائش کے وقت آپ کی ہڈیاں زیادہ تھیں! 🦴 #shorts",
+  "file": "videos/2026-10-27-human-body-ur.mp4"
+ },
+ {
+  "date": "2026-10-28",
+  "lang": "ur",
+  "theme": 4,
+  "topic": "Ocean facts (Challenger Deep ~10,935 m deeper than Everest, ocean makes half of Earth's oxygen via plankton, Pacific bigger than all land, 97% of Earth's water in ocean)",
+  "title": "سمندر میں ایورسٹ بھی ڈوب جائے! 🌊 #shorts",
+  "file": "videos/2026-10-28-ocean-ur.mp4"
+ },
+ {
+  "date": "2026-10-29",
+  "lang": "ur",
+  "theme": 5,
+  "topic": "Moon facts (moves ~3.8 cm/yr away, same side faces Earth/tidal locking, only 12 people walked on it 1969-1972, footprints remain - no wind)",
+  "title": "چاند ہم سے دور جا رہا ہے؟! 🌙 #shorts",
+  "file": "videos/2026-10-29-moon-facts-ur.mp4"
+ },
+ {
+  "date": "2026-10-30",
+  "lang": "ur",
+  "theme": 0,
+  "niche": "health",
+  "topic": "Hidden sugar in drinks (soda can up to ~10 tsp free sugars per WHO; WHO <5% ≈ 6 tsp/day; honey/syrups/juice count as free sugars; whole fruit sugar doesn't; sugar main cause of tooth decay, weight gain - NHS)",
+  "title": "ایک کین سوڈے میں دس چمچ چینی؟! 🥤 #shorts",
+  "file": "videos/2026-10-30-sugar-in-drinks.mp4"
+ }
 ]

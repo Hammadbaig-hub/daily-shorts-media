@@ -21,7 +21,7 @@ speaks. (Before that it posted general "amazing facts"; those are in history.jso
 | Publish time | 19:00 Pakistan time (or the next free slot if that has passed; at least 15 min from now) |
 | Privacy | public (user chose full auto-upload) |
 | Language | Urdu only |
-| Renderer | `tools/scripts/make_health_short.py` |
+| Renderer | `tools/scripts/make_myth_short.py` ("Myth ya Fact?" style, since 2026-11-02) |
 
 ## Why it is built this way
 
@@ -73,7 +73,8 @@ Rotate across these so the channel stays varied and useful for Pakistani familie
 - **Family:** healthy lunchbox ideas for children, breastfeeding facts (WHO),
   elderly nutrition — always general, never personal medical guidance
 
-Pick something not in `already_done` and not a near-duplicate of it.
+Pick a theme not in `already_done` and not a near-duplicate of it. A theme can
+revisit an earlier area (sugar, fruit) only with new beliefs/facts.
 
 **Stay away from:** treatment or medicine advice (doses, which pill to take),
 cures or "nuskhe", supplements and weight-loss products, claims that a food
@@ -90,71 +91,93 @@ WebSearch/WebFetch, read the actual page, and keep its URL. If a claim can't be
 confirmed there, or sources disagree, drop it. Keep numbers exactly as the
 source states them, and keep hedges ("تقریباً", "تک").
 
-Structure (40–70 seconds total):
-- **hook** — a question or surprising line that stops the scroll (under 14 words)
-- **points** — 3–5 short points, one idea each, one or two sentences
-- **cta** — one practical action for today + "صحت مند زندگی کے لیے برائٹ لائف کو فالو کریں"
+**Format (since 2026-11-02): "Myth ya Fact?"** — the user found the old
+tip-list Shorts slow and boring, and approved this faster style. Each video is a
+quiz: a hook, then 3 popular beliefs about one theme, each answered with a
+MYTH (غلط) or FACT (سچ) stamp, then a comment CTA. Mix verdicts (e.g. 2 myths +
+1 fact) so viewers can't guess. 30–45 seconds total.
+
+- **hook** — under 12 words, a challenge: "یہ تین باتیں سب مانتے ہیں! لیکن کیا یہ سچ ہیں؟"
+- **items** — exactly 3. `claim` = the belief as people say it (short, ends with
+  "!"), `verdict` = `myth` or `fact`, `explain` = starts with "غلط!" or "بالکل سچ!",
+  then one or two short sentences with the sourced fact.
+  A *myth* is only a myth if the source clearly says the opposite; a *fact* must
+  be stated by the source. Pick beliefs Pakistani families really hold.
+- **cta** — "آپ کتنے صحیح نکلے؟ کمنٹ میں بتائیں! صحت مند زندگی کے لیے برائٹ لائف کو فالو کریں"
 - **disclaimer** — always: "یہ معلومات صرف آگاہی کے لیے ہیں۔ کسی بیماری میں ڈاکٹر سے مشورہ کریں۔"
 
-Write natural, simple, professional Urdu in Urdu script — the way a Pakistani
-health presenter talks, not a translation. Write numbers as Urdu words (چھ چمچ,
-دس گلاس) so the voice reads them properly, avoid English abbreviations, and keep
-sentences short. If a word keeps coming out wrong, add aerab (zabar/zer/pesh) to
-that word only.
+Never make a "myth" out of something a health authority recommends, and never
+frame a treatment, medicine or remedy as a fact.
 
-For each scene pick 1–3 icons that show the idea, add `mark` (`good` ✅, `bad` ❌,
-`warn` ⚠️) when the point is a do or a don't, and use `count` when a number of
-things is the point (e.g. 10 spoons of sugar). Icon names are the file names in
-`tools/assets/icons/`:
+Write natural, simple, professional Urdu in Urdu script — the way a Pakistani
+health presenter talks, not a translation. Write numbers as Urdu words (تیس گرام,
+دس گلاس) so the voice reads them properly, avoid English abbreviations, and keep
+sentences short; use "!" and "؟" — the voice reads them with more energy. If a
+word keeps coming out wrong, add aerab (zabar/zer/pesh) to that word only.
+
+Pick 1–3 icons per claim and per explanation, and an optional `mark` (`good` ✅,
+`bad` ❌, `warn` ⚠️) on the explanation. Icon names are the file names in
+`tools/assets/icons/` (more Fluent 3D emoji, MIT, can be added from
+github.com/microsoft/fluentui-emoji `assets/<Name>/3D/*_3d.png`, resized to 256×256):
 
 water glass milk apple orange banana grapes lemon watermelon avocado carrot
 broccoli leafy cucumber salad soup egg fish bread peanuts burger fries soda candy
-chocolate donut cake salt teaspoon heart greenheart anatomicalheart lungs brain
-tooth bicep runner walking yoga sleep bed zzz check cross warning noentry bulb
-sparkles fire sun stopwatch target chartup chartdown stethoscope pill microbe
-shield baby child oldman doctor strong happy sick dizzy thinking shocked yum
-scale sweat
+chocolate donut cake salt teaspoon honey potato ice droplet heart greenheart
+anatomicalheart lungs brain tooth bicep runner walking yoga sleep bed zzz check
+cross warning noentry bulb sparkles fire sun stopwatch target chartup chartdown
+stethoscope pill microbe shield baby child oldman doctor strong happy sick dizzy
+thinking shocked yum scale sweat
 
 Save as `script.json`:
 
 ```json
 {
- "lang": "ur", "palette": 1, "handle": "@Bright-Life-m4",
- "hook": {"text": "...", "icons": ["candy", "shocked"]},
- "points": [
-  {"text": "...", "icons": ["soda", "shocked"], "mark": "bad", "count": {"icon": "teaspoon", "n": 10}},
-  {"text": "...", "icons": ["apple", "orange", "milk"], "mark": "good"}
+ "lang": "ur", "palette": 0, "handle": "@Bright-Life-m4",
+ "hook": {"text": "یہ تین باتیں سب مانتے ہیں! لیکن کیا یہ سچ ہیں؟", "icons": ["shocked", "thinking"]},
+ "items": [
+  {"claim": "شہد قدرتی ہے، اس لیے جتنا مرضی کھائیں!", "claim_icons": ["honey", "teaspoon"],
+   "verdict": "myth",
+   "explain": "غلط! شہد کی مٹھاس بھی چینی میں گنی جاتی ہے۔ ...", "explain_icons": ["honey", "candy"], "mark": "warn"},
+  {"claim": "...", "claim_icons": ["potato", "thinking"], "verdict": "fact",
+   "explain": "بالکل سچ! ...", "explain_icons": ["potato", "bread"]}
  ],
- "cta": {"text": "...", "icons": ["water", "greenheart"]},
+ "cta": {"text": "آپ کتنے صحیح نکلے؟ کمنٹ میں بتائیں! صحت مند زندگی کے لیے برائٹ لائف کو فالو کریں", "icons": ["greenheart", "happy"]},
  "disclaimer": "یہ معلومات صرف آگاہی کے لیے ہیں۔ کسی بیماری میں ڈاکٹر سے مشورہ کریں۔"
 }
 ```
 
 ### 4. Check frames, then render
 
-First draw one frame per scene (takes ~30 s) and look at the contact sheet:
+Renderer: `tools/scripts/make_myth_short.py` — vivid backgrounds with rotating
+light rays, big 2–3-word kinetic captions (spoken word in yellow), 3-2-1
+suspense timer with ticks after each claim, MYTH/FACT stamp slam with shake,
+flash and buzzer/ding, zoom punches and whooshes, a 124 bpm original beat that
+ducks under the voice, and a faster, livelier Fasih voice.
+
+First draw one frame per segment (~30 s) and look at them:
 
 ```bash
-PREVIEW=1 python daily-shorts-media/tools/scripts/make_health_short.py script.json out.mp4
+PREVIEW=1 python daily-shorts-media/tools/scripts/make_myth_short.py script.json out.mp4
 ```
 
-It writes `out.mp4.scene0.png`, `scene1.png`, … Look at them with Read: text
-inside the white card, highlight on the right word, icons not overlapping the
-card. If a caption is too long, shorten that line. Delete the PNGs, then render:
+It writes `out.mp4.seg0.png`, `seg1.png`, … Look at them with Read (a contact
+sheet of all of them is quickest): captions fully visible and not clipped,
+stamp readable, icons not covering the caption. Delete the PNGs, then render:
 
 ```bash
-python daily-shorts-media/tools/scripts/make_health_short.py script.json daily-shorts-media/videos/<date>-<slug>.mp4 > render.log 2>&1
+python daily-shorts-media/tools/scripts/make_myth_short.py script.json daily-shorts-media/videos/<date>-<slug>.mp4 > render.log 2>&1
 ```
 
-Rendering takes about 6–8 minutes on CPU, so run it with Bash `run_in_background`
-and wait for the completion notice. Don't wait with a `pgrep -f make_` loop — it
-matches its own command line and never ends. The script refuses anything over 3
-minutes; aim for 40–70 s.
+Rendering takes about 3 minutes on CPU; run it with Bash `run_in_background`
+(or a long timeout) and wait for the completion notice. Don't wait with a
+`pgrep -f make_` loop — it matches its own command line and never ends. Aim for
+30–45 s. The old calm tip-list renderer, `make_health_short.py` (script format
+with `points`), stays as a fallback.
 
 ### 5. Push to GitHub
 
 Append today's entry to `history.json`:
-`{"date": "...", "lang": "ur", "theme": n, "niche": "health", "topic": "...", "title": "...", "file": "videos/...mp4"}`
+`{"date": "...", "lang": "ur", "theme": n, "niche": "health", "style": "myth-fact", "topic": "...", "title": "...", "file": "videos/...mp4"}`
 
 Keep only the 20 newest `.mp4` files in `videos/` (Metricool keeps its own copy).
 Then:
@@ -198,7 +221,7 @@ realistic synthetic footage of people or events, which is what YouTube's
 disclosure covers.
 
 **Title (Urdu):** under 70 characters, a curiosity or benefit hook + emoji +
-`#shorts`, e.g. `ایک کین سوڈا میں دس چمچ چینی؟! 🥤 #shorts`.
+`#shorts`, quiz-style, e.g. `شہد جتنا مرضی کھائیں؟ سچ یا غلط! 🍯 #shorts`.
 
 **Description:** 2–3 Urdu lines on the takeaway, the disclaimer line, then
 `Sources:` with every URL used, then hashtags: `#صحت #HealthTipsUrdu #Nutrition

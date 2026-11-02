@@ -95,11 +95,12 @@ def _piper_voice():
     return _piper
 
 
-def speak_urdu_native(text, speed=1.0):
-    """Float32 mono at 24 kHz (resampled from Piper's 22.05 kHz)."""
+def speak_urdu_native(text, speed=1.0, noise_scale=None, noise_w=None):
+    """Float32 mono at 24 kHz (resampled from Piper's 22.05 kHz).
+    Higher noise_scale / noise_w = livelier, less flat intonation."""
     from piper import SynthesisConfig
     v = _piper_voice()
-    cfg = SynthesisConfig(length_scale=1.0 / speed)
+    cfg = SynthesisConfig(length_scale=1.0 / speed, noise_scale=noise_scale, noise_w_scale=noise_w)
     chunks = [c.audio_float_array for c in v.synthesize(text, syn_config=cfg)]
     a = np.concatenate(chunks).astype(np.float32)
     sr_in = v.config.sample_rate

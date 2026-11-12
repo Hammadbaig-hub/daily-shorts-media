@@ -93,6 +93,31 @@ def speak(text):
     return a  # (slightly faster too, which is what we want)
 
 
+def load_voice(vdir, k, text):
+    """ElevenLabs clip k (24 kHz float) + word start times from its character alignment."""
+    mp3 = os.path.join(vdir, f"seg{k}.mp3")
+    meta_p = os.path.join(vdir, f"seg{k}.json")
+    if not os.path.exists(mp3):
+        sys.exit(f"missing {mp3} — did the ElevenLabs workflow run?")
+    raw = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", mp3, "-f", "f32le", "-ac", "1",
+                          "-ar", str(SR_V), "-"], check=True, capture_output=True).stdout
+    clip = np.frombuffer(raw, dtype=np.float32).copy()
+    starts = None
+    try:
+        with open(meta_p, encoding="utf-8") as fh:
+            meta = json.load(fh)
+        if meta.get("text") != text:
+            sys.exit(f"seg{k}: voice text doesn't match script.json — rerun eleven_prep + workflow")
+        al = meta.get("alignment") or {}
+        chars, st = al.get("characters") or [], al.get("character_start_times_seconds") or []
+        if "".join(chars) == text and len(st) == len(chars):
+            starts = [st[i] for i, c in enumerate(text)
+                      if not c.isspace() and (i == 0 or text[i - 1].isspace())]
+    except (OSError, ValueError):
+        pass
+    return clip, starts
+
+
 def tone(f, dur, decay, sr=SR):
     t = np.arange(int(dur * sr)) / sr
     return np.sin(2 * np.pi * f * t) * np.exp(-t * decay)
@@ -347,8 +372,13 @@ def render(spec, out_path):
     segs = build_segments(spec)
 
     t = 0.0
-    for sg in segs:
-        clip = speak(sg["text"])
+    vdir = os.environ.get("VOICE_DIR")   # ElevenLabs narration made by eleven_tts.py
+    for k, sg in enumerate(segs):
+        word_starts = None
+        if vdir:
+            clip, word_starts = load_voice(vdir, k, sg["text"])
+        else:
+            clip = speak(sg["text"])
         sg["clip"] = clip
         s0, s1 = speech_span(clip)
         lead = LEAD + (0.55 if sg["kind"] == "explain" else 0.0)   # room for the stamp slam
@@ -365,6 +395,8 @@ def render(spec, out_path):
         wts = np.array([len(w) + 1.2 for w in words], dtype=float)
         cum = np.concatenate([[0], np.cumsum(wts)[:-1]]) / wts.sum()
         sg["wt"] = list(sg["s0"] + cum * (sg["s1"] - sg["s0"]))
+        if word_starts and len(word_starts) == len(words):
+            sg["wt"] = [lead + w for w in word_starts]   # exact ElevenLabs timing
         sg["kin"] = Kinetic(sg["text"], sg["wt"], pal)
     total = t
     if total > 175:

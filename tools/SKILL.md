@@ -21,12 +21,20 @@ speaks. (Before that it posted general "amazing facts"; those are in history.jso
 | Publish time | 19:00 Pakistan time (or the next free slot if that has passed; at least 15 min from now) |
 | Privacy | public (user chose full auto-upload) |
 | Language | Urdu voice and captions; YouTube **title in English** (since 2026-11-12) |
-| Renderer | `tools/scripts/make_myth_short.py` ("Myth ya Fact?" style, since 2026-11-02) |
+| Renderer | `tools/scripts/make_remotion_short.py` (Remotion, since 2026-11-12; "Myth ya Fact?" style since 2026-11-02). Fallback: `make_myth_short.py` |
 
 ## Why it is built this way
 
-- **Free:** the user has no budget. Video = Pillow + numpy + ffmpeg; music is
-  synthesized in the script (original, so no Content ID claims).
+- **Free:** the user has no budget. Audio (voice, SFX, beat, mix) = Python +
+  ffmpeg; music is synthesized in the script (original, so no Content ID claims).
+- **Remotion visuals (user asked for Remotion on 2026-11-12):** the video is drawn
+  by the Remotion project in `tools/remotion/` (React, rendered in headless
+  Chrome) — proper Nastaliq shaping, smooth spring animations. Python
+  (`make_myth_short.py` with `TIMELINE_OUT`) still makes the audio mix and a
+  word-timed `timeline.json`; `make_remotion_short.py` runs both. Remotion can't
+  download its own Chrome in the cloud sandbox, so `remotion.config.ts` points it
+  at the preinstalled Playwright headless shell (`REMOTION_CHROME` overrides).
+  Remotion is free for individuals/teams up to 3 people.
 - **Native Urdu voice:** Piper "Fasih" (ur_PK, male, MIT licence), trained on real
   Urdu speech, so the accent is genuinely Pakistani Urdu. Downloads once (~67 MB)
   from the sherpa-onnx GitHub release into `~/tts`. The renderer speeds it up 6%,
@@ -148,31 +156,44 @@ Save as `script.json`:
 
 ### 4. Check frames, then render
 
-Renderer: `tools/scripts/make_myth_short.py` — vivid backgrounds with rotating
-light rays, big 2–3-word kinetic captions (spoken word in yellow), 3-2-1
-suspense timer with ticks after each claim, MYTH/FACT stamp slam with shake,
-flash and buzzer/ding, zoom punches and whooshes, a 124 bpm original beat that
-ducks under the voice, and a faster, livelier Fasih voice.
+Renderer: `tools/scripts/make_remotion_short.py` (Remotion) — vivid gradient
+backgrounds with rotating light rays and drifting icons, big 2–3-word kinetic
+captions (spoken word in yellow with a pop), 3-2-1 suspense ring with ticks after
+each claim, MYTH/FACT stamp slam with shake, flash and buzzer/ding, zoom punches
+and whooshes, a 124 bpm original beat that ducks under the voice, and the
+livelier Fasih voice. Same `script.json` as before. The first run in a fresh
+sandbox does `npm ci` in `tools/remotion` automatically (~1 min).
 
-First draw one frame per segment (~30 s) and look at them:
+First draw one frame per segment (~1 min) and look at the contact sheet:
 
 ```bash
-PREVIEW=1 python daily-shorts-media/tools/scripts/make_myth_short.py script.json out.mp4
+PREVIEW=1 python daily-shorts-media/tools/scripts/make_remotion_short.py script.json out.mp4
 ```
 
-It writes `out.mp4.seg0.png`, `seg1.png`, … Look at them with Read (a contact
-sheet of all of them is quickest): captions fully visible and not clipped,
-stamp readable, icons not covering the caption. Delete the PNGs, then render:
+It writes `out.mp4.seg0.png`, `seg1.png`, … and `out.mp4.sheet.png`. Look at the
+sheet with Read: captions fully visible and not clipped, stamp readable, icons
+not covering the caption. Delete the PNGs, then render:
+
+```bash
+python daily-shorts-media/tools/scripts/make_remotion_short.py script.json daily-shorts-media/videos/<date>-<slug>.mp4 > render.log 2>&1
+```
+
+Rendering takes about 4–5 minutes on 2 CPUs; run it with Bash `run_in_background`
+(or a 600000 ms timeout) and wait for the completion notice. Don't wait with a
+`pgrep -f make_` loop — it matches its own command line and never ends. Aim for
+30–45 s. Never leave `tools/remotion/public/{job,icons,fonts}` or
+`tools/remotion/out` in a commit (they are git-ignored).
+
+If the Remotion render fails (npm install or Chrome problem), use the Pillow
+renderer for the same script so the day still gets a video, and say so in the
+report:
 
 ```bash
 python daily-shorts-media/tools/scripts/make_myth_short.py script.json daily-shorts-media/videos/<date>-<slug>.mp4 > render.log 2>&1
 ```
 
-Rendering takes about 3 minutes on CPU; run it with Bash `run_in_background`
-(or a long timeout) and wait for the completion notice. Don't wait with a
-`pgrep -f make_` loop — it matches its own command line and never ends. Aim for
-30–45 s. The old calm tip-list renderer, `make_health_short.py` (script format
-with `points`), stays as a fallback.
+The old calm tip-list renderer, `make_health_short.py` (script format with
+`points`), stays as a last fallback.
 
 ### 5. Push to GitHub
 

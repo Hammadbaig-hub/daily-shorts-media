@@ -432,6 +432,24 @@ def render(spec, out_path):
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", premix, "-af",
                     "loudnorm=I=-14:TP=-1.5:LRA=8", "-ar", str(SR), "-ac", "1", wav], check=True)
 
+    # Remotion renderer: write the finished audio mix + a timeline, skip Pillow visuals
+    tl_dir = os.environ.get("TIMELINE_OUT")
+    if tl_dir:
+        import shutil
+        os.makedirs(tl_dir, exist_ok=True)
+        shutil.copy(wav, os.path.join(tl_dir, "mix.wav"))
+        keep = ("kind", "text", "icons", "item", "n", "verdict", "mark", "lead", "s0", "s1", "dur", "start", "wt")
+        timeline = dict(
+            total=total, fps=FPS, suspense=SUSPENSE, palette=int(spec.get("palette", 0)) % len(PALETTES),
+            handle=spec.get("handle", ""), disclaimer=spec.get("disclaimer", ""), seed=seed,
+            segments=[{k: (float(v) if isinstance(v, (np.floating,)) else
+                           [float(x) for x in v] if k == "wt" else v)
+                       for k, v in sg.items() if k in keep} for sg in segs])
+        with open(os.path.join(tl_dir, "timeline.json"), "w", encoding="utf-8") as fh:
+            json.dump(timeline, fh, ensure_ascii=False, indent=1)
+        print(f"timeline + audio written to {tl_dir} ({total:.1f}s)")
+        return
+
     # ---- visuals
     floats = sorted({i for sg in segs for i in sg["icons"]} | {"sparkles", "greenheart", "bulb"})
     bg = Background(pal, seed, floats)

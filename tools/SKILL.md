@@ -21,6 +21,7 @@ speaks. (Before that it posted general "amazing facts"; those are in history.jso
 | Publish time | 19:00 Pakistan time (or the next free slot if that has passed; at least 15 min from now) |
 | Privacy | public (user chose full auto-upload) |
 | Language | Urdu voice and captions; YouTube **title in English** (since 2026-11-12) |
+| Voice | ElevenLabs `eleven_v3` via GitHub Actions (since 2026-11-12); Piper "Fasih" only as fallback |
 | Renderer | `tools/scripts/make_remotion_short.py` (Remotion, since 2026-11-12; "Myth ya Fact?" style since 2026-11-02). Fallback: `make_myth_short.py` |
 
 ## Why it is built this way
@@ -35,12 +36,19 @@ speaks. (Before that it posted general "amazing facts"; those are in history.jso
   download its own Chrome in the cloud sandbox, so `remotion.config.ts` points it
   at the preinstalled Playwright headless shell (`REMOTION_CHROME` overrides).
   Remotion is free for individuals/teams up to 3 people.
-- **Native Urdu voice:** Piper "Fasih" (ur_PK, male, MIT licence), trained on real
-  Urdu speech, so the accent is genuinely Pakistani Urdu. Downloads once (~67 MB)
-  from the sherpa-onnx GitHub release into `~/tts`. The renderer speeds it up 6%,
-  EQs it for clarity, compresses it and normalises the mix to −14 LUFS (YouTube's
-  playback level) so it sounds clear and lively on phones. The user approved this
-  voice on 2026-10-29.
+- **Urdu voice = ElevenLabs (since 2026-11-12):** the user found the free Piper
+  "Fasih" voice bad with wrong pronunciation, rejected all free alternatives
+  (Kokoro/Piper Hindi voices), and chose ElevenLabs with **his own ElevenLabs
+  account**. Model `eleven_v3` (speaks Urdu), about 520 characters per video.
+  The cloud sandbox can't reach api.elevenlabs.io, so the GitHub Actions workflow
+  `.github/workflows/eleven-tts.yml` makes the audio (repo secret
+  `ELEVENLABS_API_KEY`; optional repo variables `ELEVENLABS_VOICE_ID`,
+  `ELEVENLABS_MODEL`) and commits `voice/<date>/seg*.mp3` + character
+  timestamps, which give exact word-by-word caption timing. The user picked a
+  deep male voice ("Marcus" in a Higgsfield test); until he sets
+  `ELEVENLABS_VOICE_ID`, the premade male voice "Brian" is used.
+  The mix is EQ'd, compressed and normalised to −14 LUFS (YouTube's level).
+  **Fallback:** Piper "Fasih" (old voice) only if the workflow fails — and say so.
 - **Animation:** Microsoft Fluent 3D emoji (MIT) in `tools/assets/icons/` — they
   pop in, bob, sway and breathe the whole time; faint icons drift in the
   background; captions appear word by word with the spoken word highlighted.
@@ -154,6 +162,27 @@ Save as `script.json`:
 }
 ```
 
+### 3b. Make the ElevenLabs voice (GitHub Actions)
+
+```bash
+python daily-shorts-media/tools/scripts/eleven_prep.py script.json daily-shorts-media/voice/<date>
+cd daily-shorts-media && git add voice && git commit -qm "Voice job <date>" && git push -q
+```
+
+Then start the workflow with the GitHub MCP tool `actions_run_trigger`
+(method `run_workflow`, owner `Hammadbaig-hub`, repo `daily-shorts-media`,
+workflow_id `eleven-tts.yml`, ref `main`, inputs `{"job": "voice/<date>"}`).
+Find the run with `actions_list` (`list_workflow_runs`, resource_id
+`eleven-tts.yml`) and check it with `actions_get` (`get_workflow_run`) every
+~30 s (Bash `sleep 30` between checks) — it takes about 1 minute. When it
+succeeds, `git pull` and check `voice/<date>/seg0.mp3` … exist. If it fails,
+read the log with `get_job_logs` (failed_only) and report the exact error
+(e.g. missing secret, quota used up, invalid voice ID); then render with the
+Piper fallback (leave out `VOICE_DIR`) so the day still gets a video.
+
+If you change script.json after this step, rerun this step — the renderer
+refuses voice files whose text doesn't match.
+
 ### 4. Check frames, then render
 
 Renderer: `tools/scripts/make_remotion_short.py` (Remotion) — vivid gradient
@@ -167,7 +196,7 @@ sandbox does `npm ci` in `tools/remotion` automatically (~1 min).
 First draw one frame per segment (~1 min) and look at the contact sheet:
 
 ```bash
-PREVIEW=1 python daily-shorts-media/tools/scripts/make_remotion_short.py script.json out.mp4
+VOICE_DIR=daily-shorts-media/voice/<date> PREVIEW=1 python daily-shorts-media/tools/scripts/make_remotion_short.py script.json out.mp4
 ```
 
 It writes `out.mp4.seg0.png`, `seg1.png`, … and `out.mp4.sheet.png`. Look at the
@@ -175,7 +204,7 @@ sheet with Read: captions fully visible and not clipped, stamp readable, icons
 not covering the caption. Delete the PNGs, then render:
 
 ```bash
-python daily-shorts-media/tools/scripts/make_remotion_short.py script.json daily-shorts-media/videos/<date>-<slug>.mp4 > render.log 2>&1
+VOICE_DIR=daily-shorts-media/voice/<date> python daily-shorts-media/tools/scripts/make_remotion_short.py script.json daily-shorts-media/videos/<date>-<slug>.mp4 > render.log 2>&1
 ```
 
 Rendering takes about 4–5 minutes on 2 CPUs; run it with Bash `run_in_background`
@@ -200,7 +229,7 @@ The old calm tip-list renderer, `make_health_short.py` (script format with
 Append today's entry to `history.json`:
 `{"date": "...", "lang": "ur", "theme": n, "niche": "health", "style": "myth-fact", "topic": "...", "title": "...", "file": "videos/...mp4"}`
 
-Keep only the 20 newest `.mp4` files in `videos/` (Metricool keeps its own copy).
+Keep only the 20 newest `.mp4` files in `videos/` (Metricool keeps its own copy) and the 20 newest folders in `voice/`.
 Then:
 
 ```bash
@@ -277,6 +306,9 @@ week's choices toward those categories.
   has no GitHub access, the Claude GitHub App must include `daily-shorts-media`
   (github.com/settings/installations → Claude → Configure); the user confirms that
   step because GitHub asks for 2FA.
+- **ElevenLabs workflow fails:** render with Piper "Fasih" (no `VOICE_DIR`), and
+  tell the user the exact error (missing `ELEVENLABS_API_KEY` secret, quota
+  used up → upgrade/wait for monthly reset, bad voice ID).
 - **Urdu voice download fails:** fall back to the older renderer
   `tools/scripts/make_short.py` (Kokoro voice) so the day still gets a video,
   and say so in the report.

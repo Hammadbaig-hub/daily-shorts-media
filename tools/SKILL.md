@@ -20,7 +20,7 @@ speaks. (Before that it posted general "amazing facts"; those are in history.jso
 | Channel | "Bright Life", handle `@Bright-Life-m4` |
 | Publish time | 19:00 Pakistan time (or the next free slot if that has passed; at least 15 min from now) |
 | Privacy | public (user chose full auto-upload) |
-| Language | Urdu only |
+| Language | Urdu voice and captions; YouTube **title in English** (since 2026-11-12) |
 | Renderer | `tools/scripts/make_myth_short.py` ("Myth ya Fact?" style, since 2026-11-02) |
 
 ## Why it is built this way
@@ -220,12 +220,19 @@ Call `createScheduledPost` with `blogId` `7592220`, a top-level `date`
 realistic synthetic footage of people or events, which is what YouTube's
 disclosure covers.
 
-**Title (Urdu):** under 70 characters, a curiosity or benefit hook + emoji +
-`#shorts`, quiz-style, e.g. `شہد جتنا مرضی کھائیں؟ سچ یا غلط! 🍯 #shorts`.
+**Title (ENGLISH, since 2026-11-12):** the user saw very low views with Urdu-script
+titles and asked for titles in English. Write the title in simple English (no Urdu
+script), under 70 characters: a curiosity/quiz hook + emoji + `#shorts`, and add
+"Urdu" or "Pakistan" when it fits naturally so the audience knows the language,
+e.g. `Is Banaspati Ghee Safe? Myth or Fact! 🧈 #shorts` or
+`Eat Unlimited Honey? Myth or Fact | Urdu Health Tips 🍯 #shorts`.
+The video itself (voice and captions) stays in Urdu.
 
-**Description:** 2–3 Urdu lines on the takeaway, the disclaimer line, then
-`Sources:` with every URL used, then hashtags: `#صحت #HealthTipsUrdu #Nutrition
-#shorts` plus 1–2 topic tags.
+**Description:** first line in English (the hook/takeaway, with the main search
+keywords), then 2–3 Urdu lines on the takeaway, the disclaimer line, then
+`Sources:` with every URL used, then hashtags: `#HealthTipsUrdu #Nutrition
+#MythOrFact #shorts #صحت` plus 1–2 English topic tags. Tags: mostly English
+search terms (e.g. "health tips urdu", "myth or fact", the topic in English).
 
 ### 7. Report
 
